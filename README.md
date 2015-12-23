@@ -14,4 +14,4 @@ Wordpress 单栏自适应透明博客主题。
 10. 主题顶部的 about 内容须手动修改对应文件（因为没有后台），修改很简单。
 11. 主题只支持 1 级菜单，并且菜单还不能太多。
 
-## 更多帮助见这里：http://lms.im/theme/wordpress-response-theme-waterflow
+#### 更多帮助见这里：http://lms.im/theme/wordpress-response-theme-waterflow
