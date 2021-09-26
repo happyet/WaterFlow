@@ -1,5 +1,7 @@
 <?php
-require get_template_directory() . '/inc/classic-smilies.php';
+if ( version_compare( $GLOBALS['wp_version'], '5.3', '<' ) ) {
+	require get_template_directory() . '/inc/back-compat.php';
+}
 remove_action( 'wp_head', 'wp_generator' );
 remove_action( 'wp_head', 'rsd_link' );
 remove_action( 'wp_head', 'wlwmanifest_link' );
@@ -18,7 +20,8 @@ function remove_open_sans() {
 }
 add_action( 'init', 'remove_open_sans' );
 
-function HuI_setup() {
+function lmsim_setup() {
+    add_theme_support( 'title-tag' );
     register_nav_menu( 'monkeyking', '主题菜单' );
     add_theme_support( 'post-thumbnails' );
     add_theme_support( 'html5', array(
@@ -27,21 +30,48 @@ function HuI_setup() {
 	add_theme_support( 'post-formats', array(
 		'aside', 'image', 'video', 'quote', 'link', 'gallery', 'status', 'audio', 'chat'
 	) );
+    add_theme_support( 'custom-logo', array(
+		'height'      => 172,
+		'width'       => 318,
+		'flex-height' => true,
+	) );
+    add_theme_support( 'custom-background' );
 }
-add_action( 'after_setup_theme', 'HuI_setup' );
+add_action( 'after_setup_theme', 'lmsim_setup' );
 
-function HuI_load_static_files(){
+function lmsim_load_static_files(){
 	$static_dir = get_template_directory_uri() . '/static/';
-	wp_enqueue_style( 'bootstrap', $static_dir . 'css/bootstrap.min.css', array(), '3.3.5' );
-	wp_enqueue_style('HuI-style', $static_dir . 'css/main.css' , array(), '20150726' , 'screen');
-	wp_enqueue_script( 'bootstrap', $static_dir . 'js/bootstrap.min.js', array(), '3.3.5', true );
-    wp_enqueue_script( 'HuI', $static_dir . 'js/main.js' , array( 'jquery' ), '20151122', true );
-    wp_localize_script( 'HuI', 'HuI', array(
-        'ajax_url'   => admin_url('admin-ajax.php')
+    wp_enqueue_style( 'lmsim', get_template_directory_uri() . '/style.css', array(), wp_get_theme()->get( 'Version' ) );
+    wp_enqueue_style('iconfont', $static_dir . 'css/iconfont.css' , array(), '20210916');
+	wp_enqueue_style('lmsim-main', $static_dir . 'css/main.css' , array(), '20210916');
+    if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) wp_enqueue_script( 'comment-reply' );
+    wp_enqueue_script( 'lmsim', $static_dir . 'js/main.js' , array( 'jquery' ), '20151122', true );
+    wp_localize_script( 'lmsim', 'lmsim', array(
+        'ajax_url'   => admin_url('admin-ajax.php'),
+        'order' => get_option('comment_order'),
+        'formpostion' => 'top', //默认为bottom，如果你的表单在顶部则设置为top。
     ) );
 }
-add_action( 'wp_enqueue_scripts', 'HuI_load_static_files' );
-
+add_action( 'wp_enqueue_scripts', 'lmsim_load_static_files' );
+function lmsim_widgets_init() {
+    register_sidebar(array(
+    	'id' => 'sidebar-1',
+        'name' => 'Widget Area',
+        'before_widget' => '<div class="side-box my-4 pb-3 %2$s">',
+        'after_widget' => '</div>',
+        'before_title' => '<h3 class="widget-title">',
+        'after_title' => '</h3>',
+    ));
+}
+add_action( 'widgets_init', 'lmsim_widgets_init' );
+function lms_auto_excerpt_more( $more ) {
+    return ' &hellip;';
+}
+add_filter( 'excerpt_more', 'lms_auto_excerpt_more' );
+function lmsim_excerpt_length( $length ) {
+	return 120;
+}
+add_filter( 'excerpt_length', 'lmsim_excerpt_length' );
 function twentythirteen_wp_title( $title, $sep ) {
 	global $paged, $page;
 
@@ -71,15 +101,13 @@ function my_more_link($link){
 add_filter('the_content_more_link','my_more_link');
 
 function get_ssl_avatar($avatar) {
-    $avatar = str_replace(array("www.gravatar.com", "0.gravatar.com", "1.gravatar.com", "2.gravatar.com"), "cn.gravatar.com", $avatar);
+    $avatar = str_replace(array("www.gravatar.com", "0.gravatar.com", "1.gravatar.com", "2.gravatar.com"), "cravatar.cn", $avatar);
     return $avatar;
 }
 add_filter('get_avatar', 'get_ssl_avatar');
 
-function link_to_menu_editor( $args )
-{
-    if ( ! current_user_can( 'manage_options' ) )
-    {
+function link_to_menu_editor( $args ){
+    if ( ! current_user_can( 'manage_options' ) ) {
         return;
     }
 
@@ -89,21 +117,16 @@ function link_to_menu_editor( $args )
         . '<a href="' .admin_url( 'nav-menus.php' ) . '">' . $before . 'Add a menu' . $after . '</a>'
         . $link_after;
 
-    if ( FALSE !== stripos( $items_wrap, '<ul' )
-        or FALSE !== stripos( $items_wrap, '<ol' )
-    )
-    {
+    if ( FALSE !== stripos( $items_wrap, '<ul' ) or FALSE !== stripos( $items_wrap, '<ol' ) ) {
         $link = "<li>$link</li>";
     }
 
     $output = sprintf( $items_wrap, $menu_id, $menu_class, $link );
-    if ( ! empty ( $container ) )
-    {
+    if ( ! empty ( $container ) ) {
         $output  = "<$container class='$container_class' id='$container_id'>$output</$container>";
     }
 
-    if ( $echo )
-    {
+    if ( $echo ) {
         echo $output;
     }
 
@@ -136,42 +159,41 @@ function add_remove_contactmethods( $contactmethods ) {
     unset($contactmethods['jabber']);
     // Add 
 	$contactmethods['tencent-qq'] = 'QQ';
-	$contactmethods['sina-weibo'] = 'Weibo';
-	$contactmethods['renren'] = 'RenRen';
+    $contactmethods['weixin'] = '微信';
+    $contactmethods['alipay'] = '支付宝';
+	$contactmethods['sina-weibo'] = '微博';
 	$contactmethods['github'] = 'Github';
 	$contactmethods['twitter'] = 'Twitter';
 	$contactmethods['facebook'] = 'FaceBook';
-	$contactmethods['flickr'] = 'Flickr';
-    $contactmethods['instagram'] = 'Instagram';
     return $contactmethods;
 }
 add_filter('user_contactmethods','add_remove_contactmethods',10,1);
-
 function show_social(){
 	$rss = get_bloginfo('rss_url');
-	$qqid = get_user_meta( 1, 'tencent-qq', true);
-	$wburl = get_user_meta( 1, 'sina-weibo', true);
-	$rrurl = get_user_meta( 1, 'renren', true);
-	$gturl = get_user_meta( 1, 'github', true);
-	$tturl = get_user_meta( 1, 'twitter', true);
-	$fburl = get_user_meta( 1, 'facebook', true);
-	$flurl = get_user_meta( 1, 'flickr', true);
-	$insta = get_user_meta( 1, 'instagram', true);
-	$email = 'mailto:' . get_user_by('id', 1)->user_email;
+	$qq = get_user_meta( 1, 'tencent-qq', true);
+	$wb = get_user_meta( 1, 'sina-weibo', true);
+	$gt = get_user_meta( 1, 'github', true);
+	$tw = get_user_meta( 1, 'twitter', true);
+	$fb = get_user_meta( 1, 'facebook', true);
+	$wx = get_user_meta( 1, 'weixin', true);
+    $ap = get_user_meta( 1, 'alipay', true);
 	/**/
 
-	$array = array('rss' => $rss, 'qq' => $qqid, 'weibo' => $wburl, 'renren' => $rrurl, 'twitter' => $tturl, 'facebook' => $fburl, 'git' => $gturl, 'flickr' => $flurl, 'instagram' => $insta, 'mail' => $email,);
+	$array = array('qq' => $qq, 'wechat' => $wx, 'alipay' => $ap, 'weibo' => $wb, 'twitter' => $tw, 'facebook' => $fb, 'github' => $gt, 'rss' => $rss);
 	$social = '<div class="social-icon">';
-	foreach($array as $arr=>$key){
-		if(!empty($key)) {
-			if($arr == 'qq') $key = 'http://wpa.qq.com/msgrd?v=3&uin=' . $key . '&site=qq&menu=yes';
-			$social .= '<a href="' . $key . '" rel="nofollow" target="_blank"><span class="' . $arr . '"></span></a>';
+	foreach($array as $key=>$link){
+		if(!empty($link)) {
+            if($key == 'wechat' || $key == 'alipay'){
+                $social .= '<span class="has-qrcode"><i class="iconfont icon-' . $key . '"></i><img src="'.$link.'" class="qrcode"></span>';
+            }else{
+                if($key == 'qq') $link = 'http://wpa.qq.com/msgrd?v=3&uin=' . $link . '&site=qq&menu=yes';
+                $social .= '<span><a href="' . $link . '" rel="nofollow" target="_blank"><i class="iconfont icon-' . $key . '"></i></a></span>';
+            }
 		}
 	}
 	$social .= '</div>';
 	echo $social;
 }
-
 function lmsim_comment($comment, $args, $depth) {
 	$GLOBALS['comment'] = $comment;
 	global $commentcount, $post_id, $comment_depth, $page, $wpdb;
@@ -189,9 +211,7 @@ function lmsim_comment($comment, $args, $depth) {
 	?>
 	<li <?php comment_class(); ?> id="li-comment-<?php comment_ID() ?>" itemtype="http://schema.org/Comment" itemscope itemprop="comment">
 		<div class="comment-holder">
-			<div class="comment-avatar pull-left">
-				<?php if( $comment->comment_parent > 0) { echo get_avatar( $comment->comment_author_email, 36 );}else{ echo get_avatar( $comment->comment_author_email, 64 );} ?>
-			</div>
+			<?php if( $comment->comment_parent > 0) { echo get_avatar( $comment->comment_author_email, 36 );}else{ echo get_avatar( $comment->comment_author_email, 64 );} ?>
 			<div id="comment-<?php comment_ID(); ?>" class="comment-body">
 				<?php if( $comment->comment_parent > 0) { ?>
 					<div class="comment-meta small">
@@ -229,95 +249,25 @@ function lmsim_comment($comment, $args, $depth) {
 function mytheme_end_comment() {
 	echo '</li>';
 }
-add_action('wp_ajax_nopriv_ajax_comment', 'ajax_comment_callback');
-add_action('wp_ajax_ajax_comment', 'ajax_comment_callback');
-function ajax_comment_callback(){
-    global $wpdb;
-    $comment_post_ID = isset($_POST['comment_post_ID']) ? (int) $_POST['comment_post_ID'] : 0;
-    $post = get_post($comment_post_ID);
-    $post_author = $post->post_author;
-    if ( empty($post->comment_status) ) {
-        do_action('comment_id_not_found', $comment_post_ID);
-        ajax_comment_err('Invalid comment status.');
+function fa_ajax_comment_err($a) {
+    header('HTTP/1.0 500 Internal Server Error');
+    header('Content-Type: text/plain;charset=UTF-8');
+    echo $a;
+    exit;
+}
+function fa_ajax_comment_callback(){
+    $comment = wp_handle_comment_submission( wp_unslash( $_POST ) );
+    if ( is_wp_error( $comment ) ) {
+        $data = $comment->get_error_data();
+        if ( ! empty( $data ) ) {
+            fa_ajax_comment_err($comment->get_error_message());
+        } else {
+            exit;
+        }
     }
-    $status = get_post_status($post);
-    $status_obj = get_post_status_object($status);
-    if ( !comments_open($comment_post_ID) ) {
-        do_action('comment_closed', $comment_post_ID);
-        ajax_comment_err('Sorry, comments are closed for this item.');
-    } elseif ( 'trash' == $status ) {
-        do_action('comment_on_trash', $comment_post_ID);
-        ajax_comment_err('Invalid comment status.');
-    } elseif ( !$status_obj->public && !$status_obj->private ) {
-        do_action('comment_on_draft', $comment_post_ID);
-        ajax_comment_err('Invalid comment status.');
-    } elseif ( post_password_required($comment_post_ID) ) {
-        do_action('comment_on_password_protected', $comment_post_ID);
-        ajax_comment_err('Password Protected');
-    } else {
-        do_action('pre_comment_on_post', $comment_post_ID);
-    }
-    $comment_author       = ( isset($_POST['author']) )  ? trim(strip_tags($_POST['author'])) : null;
-    $comment_author_email = ( isset($_POST['email']) )   ? trim($_POST['email']) : null;
-    $comment_author_url   = ( isset($_POST['url']) )     ? trim($_POST['url']) : null;
-    $comment_content      = ( isset($_POST['comment']) ) ? trim($_POST['comment']) : null;
     $user = wp_get_current_user();
-    if ( $user->exists() ) {
-        if ( empty( $user->display_name ) )
-            $user->display_name=$user->user_login;
-        $comment_author       = esc_sql($user->display_name);
-        $comment_author_email = esc_sql($user->user_email);
-        $comment_author_url   = esc_sql($user->user_url);
-        $user_ID              = esc_sql($user->ID);
-        if ( current_user_can('unfiltered_html') ) {
-            if ( wp_create_nonce('unfiltered-html-comment_' . $comment_post_ID) != $_POST['_wp_unfiltered_html_comment'] ) {
-                kses_remove_filters();
-                kses_init_filters();
-            }
-        }
-    } else {
-        if ( get_option('comment_registration') || 'private' == $status )
-            ajax_comment_err('Sorry, you must be logged in to post a comment.');
-    }
-    $comment_type = '';
-    if ( get_option('require_name_email') && !$user->exists() ) {
-        if ( 6 > strlen($comment_author_email) || '' == $comment_author )
-            ajax_comment_err( 'Error: please fill the required fields (name, email).' );
-        elseif ( !is_email($comment_author_email))
-            ajax_comment_err( 'Error: please enter a valid email address.' );
-    }
-    if ( '' == $comment_content )
-        ajax_comment_err( 'Error: please type a comment.' );
-    $dupe = "SELECT comment_ID FROM $wpdb->comments WHERE comment_post_ID = '$comment_post_ID' AND ( comment_author = '$comment_author' ";
-    if ( $comment_author_email ) $dupe .= "OR comment_author_email = '$comment_author_email' ";
-    $dupe .= ") AND comment_content = '$comment_content' LIMIT 1";
-    if ( $wpdb->get_var($dupe) ) {
-        ajax_comment_err('Duplicate comment detected; it looks as though you&#8217;ve already said that!');
-    }
-    if ( $lasttime = $wpdb->get_var( $wpdb->prepare("SELECT comment_date_gmt FROM $wpdb->comments WHERE comment_author = %s ORDER BY comment_date DESC LIMIT 1", $comment_author) ) ) {
-        $time_lastcomment = mysql2date('U', $lasttime, false);
-        $time_newcomment  = mysql2date('U', current_time('mysql', 1), false);
-        $flood_die = apply_filters('comment_flood_filter', false, $time_lastcomment, $time_newcomment);
-        if ( $flood_die ) {
-            ajax_comment_err('You are posting comments too quickly.  Slow down.');
-        }
-    }
-    $comment_parent = isset($_POST['comment_parent']) ? absint($_POST['comment_parent']) : 0;
-    $commentdata = compact('comment_post_ID', 'comment_author', 'comment_author_email', 'comment_author_url', 'comment_content', 'comment_type', 'comment_parent', 'user_ID');
-
-    $comment_id = wp_new_comment( $commentdata );
-
-
-    $comment = get_comment($comment_id);
     do_action('set_comment_cookies', $comment, $user);
-    $comment_depth = 1;
-    $tmp_c = $comment;
-    while($tmp_c->comment_parent != 0){
-        $comment_depth++;
-        $tmp_c = get_comment($tmp_c->comment_parent);
-    }
-    $GLOBALS['comment'] = $comment;
-    //这里修改成你的评论结构
+    $GLOBALS['comment'] = $comment; 
     ?>
     <li <?php comment_class(); ?> id="li-comment-<?php comment_ID() ?>" itemtype="http://schema.org/Comment" itemscope itemprop="comment">
 		<div class="comment-holder">
@@ -351,14 +301,10 @@ function ajax_comment_callback(){
 	</li>
     <?php die();
 }
-function ajax_comment_err($a) {
-    header('HTTP/1.0 500 Internal Server Error');
-    header('Content-Type: text/plain;charset=UTF-8');
-    echo $a;
-    exit;
-}
+add_action('wp_ajax_nopriv_ajax_comment', 'fa_ajax_comment_callback');
+add_action('wp_ajax_ajax_comment', 'fa_ajax_comment_callback');
 
-function HuI_comment_nav() {
+function lmsim_comment_nav() {
     // Are there comments to navigate through?
     if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) :
     ?>
@@ -402,19 +348,20 @@ function fa_load_postlist_button(){
 }
 
 
-function HuI_post_section(){
+function lmsim_post_section(){
     global $post;
-    $post_section = '<article class="hentry hentry-archive"><div class="archive-title text-center clearfix"><h2 itemprop="headline"><a href="' . get_permalink() . '">' . get_the_title() . '</a></h2><div class="archive-meta small">'.get_bluefly_posted_on(). '</div></div><div class="archive-content" itemprop="about">';
+    $post_section = '<article class="hentry hentry-archive box"><div class="archive-title text-center"><h2 itemprop="headline"><a href="' . get_permalink() . '">' . get_the_title() . '</a></h2><div class="archive-meta small">'.get_bluefly_posted_on(). '</div></div><div class="archive-content" itemprop="about">';
 
     if(has_post_thumbnail()) {
         $post_section .= '<p class="with-img">' . get_the_post_thumbnail() . '</p>';
     }
-    $post_section .= apply_filters('the_content', get_the_content(''));
+    $post_section .= apply_filters('the_content', get_the_excerpt());
 
-    $post_section .= '</div><div class="archive-footer text-center small clearfix">';
+    $post_section .= '<p class="more-link"><a href="' . get_permalink() . '">...继续阅读 (+'.post_views('','','').')...</a></p>';
+    $post_section .= '</div><div class="archive-footer text-center small">';
 	$categories_list = get_the_category_list( _x( ', ', ' ', 'lmsim' ) );
-	$post_section .= '<div class="post-cats"><span class="cats"><span class="glyphicon glyphicon-folder-close" aria-hidden="true"></span>'. $categories_list . '</span></div>';
-	$post_section .= get_the_tag_list('<div class="post-tags" itemprop="keywords"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> ',', ','</div>');
+	$post_section .= '<div class="post-cats"><span class="cats"><i class="iconfont icon-discount"></i>'. $categories_list . '</span></div>';
+	$post_section .= get_the_tag_list('<div class="post-tags" itemprop="keywords">',', ','</div>');
 	$post_section .= '</div></article>';
     return $post_section;
 }
@@ -448,7 +395,7 @@ function fa_load_postlist_callback(){
     $the_query = new WP_Query( $query_args );
     while ( $the_query->have_posts() ){
         $the_query->the_post();
-        $postlist .= HuI_post_section();
+        $postlist .= lmsim_post_section();
     }
     $code = $postlist ? 200 : 500;
     wp_reset_postdata();
@@ -509,21 +456,122 @@ function bluefly_rel_post_date() {
  * 作用: 显示日期(作者隐藏)
  */
 function get_bluefly_posted_on() {
-	$time_string = '<span class="glyphicon glyphicon-time" aria-hidden="true"></span><time class="entry-date published updated" datetime="%1$s">%2$s</time>';
+	$time_string = '<time class="entry-date published updated" datetime="%1$s">%2$s</time>';
 	$time_string = sprintf( $time_string,
 		esc_attr( get_the_date( 'c' ) ),
 		bluefly_rel_post_date());
-	$byline = '<span class="author vcard"><span class="glyphicon glyphicon-user" aria-hidden="true"></span> <a class="url fn n" href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '">' . esc_html( get_the_author() ) . '</a></span>';
-	if ( ! post_password_required() && ( comments_open() || get_comments_number() ) ) {
-		$num_comments = get_comments_number();
-		if ( $num_comments == 0 ) {
-			$comments = 'No Reply';
-		} elseif ( $num_comments > 1 ) {
-			$comments = $num_comments . ' Replies';
-		} else {
-			$comments = '1 Reply';
-		}
-		$post_comments = '<span class="comment-nums"><a href="' . get_comments_link() .'"><span class="glyphicon glyphicon-comment" aria-hidden="true"></span>'. $comments.'</a></span>';
+	$byline = '<span class="author vcard">'.get_avatar( get_the_author_meta( 'user_email' ), 28 ).'<a class="url fn n" href="' . esc_url( get_author_posts_url( get_the_author_meta( 'ID' ) ) ) . '">' . esc_html( get_the_author() ) . '</a></span>';
+	$post_comments = '';
+    if ( ! post_password_required() && ( comments_open() || get_comments_number() ) ) {
+		$comments = get_comments_number();
+		$post_comments = '<span class="comment-nums"><a href="' . get_comments_link() .'"><i class="iconfont icon-chat"></i> '. $comments.'</a></span>';
 	}
 	return $byline . '<span class="posted-on">' . $time_string . '</span>'. $post_comments;
+}
+function lmsim_record_views() {
+    if (is_singular()) {
+        global $post, $user_ID;
+        $post_ID = $post->ID;
+        if (empty($_COOKIE[USER_COOKIE]) && intval($user_ID) == 0) {
+            if ($post_ID) {
+                $post_views = (int)get_post_meta($post_ID, 'views', true);
+                if (!update_post_meta($post_ID, 'views', ($post_views + 1))) {
+                    add_post_meta($post_ID, 'views', 1, true);
+                }
+            }
+        }
+    }
+}
+add_action('wp_head', 'lmsim_record_views');
+function post_views($before = '', $after = '', $echo = 1) {
+    global $post;
+    $post_ID = $post->ID;
+    $views = (int)get_post_meta($post_ID, 'views', true);
+    if ($echo) {
+        echo $before, number_format($views) , $after;
+    } else {
+        return $views;
+    }
+}
+function lmsim_theme_views(){
+	if(function_exists('the_views')) { 
+		echo the_views(false); 
+	}else{ 
+		post_views();
+	}
+}
+/*
+默认侧栏最新评论排除博主
+查看wp-includes/comment.php中WP_Comment_Query::query部分
+根据传入参数完善查询条件
+*/
+add_filter( 'comments_clauses', 'wpdit_comments_clauses', 2, 10);
+function wpdit_comments_clauses( $clauses, $comments ) {
+    global $wpdb;
+    if ( isset( $comments->query_vars['not_in__user'] ) && ( $user_id = $comments->query_vars['not_in__user'] ) ) {
+         
+        if ( is_array( $user_id ) ) {
+            $clauses['where'] .= ' AND user_id NOT IN (' . implode( ',', array_map( 'absint', $user_id ) ) . ')';
+        } elseif ( '' !== $user_id ) {
+            $clauses['where'] .= $wpdb->prepare( ' AND user_id <> %d', $user_id );
+        }
+    }
+    //var_dump($clauses);
+    return $clauses;
+}
+/*
+默认侧栏最新评论排除博主
+详细查看wp-includes/default-widgets.php中 WP_Widget_Recent_Comments 部分
+增加参数not_in__user
+*/
+add_filter( 'widget_comments_args', 'wpdit_widget_comments_args' );
+function wpdit_widget_comments_args( $args ){
+    $args['not_in__user'] = array(1); //这里放你的ID；
+    return $args;
+}
+function lmsim_noself_ping(&$links){
+    $home = get_option('home');
+    foreach ($links as $l => $link) {
+      if (0 === strpos($link, $home)) {
+        unset($links[$l]);
+      }
+    }
+}
+function search_filter_page($query){
+    if ($query->is_search) {
+      $query->set('post_type', 'post');
+    }
+    return $query;
+}
+function comment_links_in_new_tab($text) {
+      $return = str_replace('<a', '<a target="_blank"', $text);
+      return $return;
+}
+add_filter('get_comment_author_link', 'comment_links_in_new_tab');
+add_action('pre_ping', 'lmsim_noself_ping');
+add_filter('pre_get_posts', 'search_filter_page');
+add_filter('use_default_gallery_style', '__return_false');
+add_filter('pre_option_link_manager_enabled', '__return_true');
+function lmsim_custom_logo() {
+	$custom_logo_id = get_theme_mod( 'custom_logo' );
+	$description = get_bloginfo( 'description', 'display' );
+	if($custom_logo_id){
+		$html = sprintf(
+			'<a href="%1$s" class="custom-logo-link" rel="home" itemprop="url">%2$s</a>',
+			esc_url( home_url( '/' ) ),
+			wp_get_attachment_image( $custom_logo_id, 'full', false, array(
+				'class'    => 'custom-logo',
+				'itemprop' => 'logo',
+				'alt'			 => get_bloginfo( 'name' ),
+				'title'		 => $description
+			) )
+		);
+	}else{
+		$html = sprintf(
+			'<a href="%1$s" class="custom-logo-link" rel="home" itemprop="url"><img src="%2$s"></a>',
+			esc_url( home_url( '/' ) ),
+            get_template_directory_uri() . '/static/img/logo.jpg'
+        );
+	}
+	echo '<div class="logo img-logo">'.$html.'</div>';
 }

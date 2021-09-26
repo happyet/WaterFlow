@@ -1,4 +1,9 @@
-<?php get_header();?>
+<?php
+/*
+Template Name: 友情链接
+*/
+    get_header();
+?>
 <main class="main-content">
 	<?php while ( have_posts() ) : the_post(); ?>
 		<div class="hentry hentry-archive box">
@@ -14,7 +19,8 @@
                     <p class="with-img"><?php the_post_thumbnail( 'full' ); ?></p>
                 <?php endif;?>
                 <?php the_content();?>
-				<?php wp_link_pages( array(
+                <ul class="blogroll-links"><?php wp_list_bookmarks(); ?></ul>
+                <?php wp_link_pages( array(
 					'before'      => '<div class="page-links text-center comment-navigation">',
 					'after'       => '</div>',
 					'link_before' => '<span class="page-link-item">',
