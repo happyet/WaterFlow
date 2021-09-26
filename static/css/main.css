@@ -328,168 +328,7 @@ figure.wp-caption {
 .archive-description p {
 	margin: 0;
 }
-@media (min-width: 750px){
-	.page{
-		padding: 20px 0;
-	}
-	.row{
-		display: flex;
-	}
-	.col-md-4{
-		width:40%;
-		padding:0 15px;
-	}
-	.col-sm-6{
-		width: 50%;
-		padding: 0 15px;
-	}
-	.col-md-8{
-		width:60%;
-		padding:0 15px;
-	}
-	.site-header .site-branding{
-		text-align: left;
-	}
-	.site-banner{
-		display:block;
-		width: 100%;
-		height: 172px;
-		margin-top: 8px;
-		margin-bottom: 20px;
-		background-image: url(../img/logo.jpg);
-		background-size: cover
-	}
-	.img-logo img {
-		width: 100%;
-		height: auto;
-	}
-	.main-navigation{
-		display: flex;
-		padding: 10px;
-		background: rgba(255, 255, 255, 0.2);
-		border-radius: 3px;
-		box-shadow: rgb(0 0 0 / 10%) 0px 0px 5px;
-	}
-	.navbar-toggler{
-		display: none;
-	}
-	.sub-menu {
-		display: none;
-		position: absolute;
-	}
-	#site-navigation{
-		display:block;
-		position:relative;
-		margin-left: auto;
-	}
-	#site-navigation .btn-close{
-		display: none;
-	}
-	.main-navigation .search-trigger{
-		position: relative;
-		margin-left: 10px;
-		border:none;
-		right: auto;
-		background-color: transparent;
-	}
-	#site-navigation li{
-		position: relative;
-		display: inline-block;
-		margin:0 5px;
-	}
-	#site-navigation li:hover .sub-menu {
-		display: block;
-		text-align: left;
-		padding: 10px 0;
-		background-color: rgba(255, 255, 255, 0.5);
-		z-index: 1000;
-	}
-	#site-navigation .sub-menu li,#site-navigation .sub-menu li a {
-		display: block;
-	}
-	#site-navigation .sub-menu li a {
-		padding: 5px 15px;
-		word-wrap: unset;
-		word-break: keep-all;
-	}
-	.search-trigger{
-		margin-left: 2px;
-		margin-right: auto;
-	}
-	.site-title {
-		font-size: 32px;
-	}
-	.site-branding .social-icon {
-		margin-bottom: 20px;
-	}
-	.social-icon span{
-		margin-left: 0;
-		margin-right: 5px;
-	}
-	.hentry-archive {
-		padding-left: 35px;
-		padding-right: 35px;
-		padding-bottom: 35px;
-	}
-	.post-navigation .nav-links {
-		position: absolute;
-		width: 100%
-	}
-	.post-navigation .nav-links > div {
-		position: relative;
-		top: 50%;
-	}
-	.post-navigation .nav-links .nav-previous {
-		float: left;
-		left: -150px;
-	}
-	.post-navigation .nav-links .nav-next {
-		float: right;
-		right: -70px;
-	}
-	.post-navigation .nav-links a {
-		position: fixed;
-		display: block;
-		color: #999;
-		background: rgba(255,255,255,.35);
-		width: 80px;
-		height: 80px;
-		line-height: 80px;
-		bottom: 20%;
-		text-align: center;
-		box-shadow: 0 0 2px rgba(0,0,0,0.2);
-		z-index: 20;
-	}
-	.post-navigation .nav-links a:hover {
-		background: #fff
-	}
-	.post-navigation .nav-links .nav-previous a {
-		border-top-left-radius: 100%;
-		border-bottom-left-radius: 100%;
-	}
-	.post-navigation .nav-links .nav-next a {
-		border-top-right-radius: 100%;
-		border-bottom-right-radius: 100%;
-	}
-	.post-navigation .nav-links a .post-title {
-		display: none;
-	}
-	.form-group,.comment-form-cookies-consent,.form-submit {
-		padding: 0 15px;
-	}
-	.offcanvas-main{
-		padding-left:12%;
-		padding-right: 12%;
-	}
-}
-@media (min-width: 992px) {
-	.site-header .site-branding {
-		text-align: left;
-	}
-	.main-navigation.navbar-default {
-		margin-bottom: 0
-	}
-}
+
 #comments {
 	margin-bottom: 25px;
 	text-align: left;
@@ -573,8 +412,14 @@ p.form-submit {
 	display: flex;
 	padding-top: 20px;
 }
-.comment-navigation .nav-links div {
+.comment-navigation .nav-links div,.post-navigation  .nav-links div {
 	width: 50%;
+}
+.post-navigation  .nav-links {
+	display: flex;
+	margin-bottom: 30px;
+	padding: 10px 20px;
+	background-color: rgba(255, 255, 255, 0.5);
 }
 .blogroll-links {
 	list-style: none;
@@ -717,7 +562,170 @@ p.form-submit {
 	background: rgba(255,255,255,.6);
 	z-index:800
 }
-
+@media (min-width: 750px){
+	.page{
+		padding: 20px 0;
+	}
+	.row{
+		display: flex;
+	}
+	.col-md-4{
+		width:40%;
+		padding:0 15px;
+	}
+	.col-sm-6{
+		width: 50%;
+		padding: 0 15px;
+	}
+	.col-md-8{
+		width:60%;
+		padding:0 15px;
+	}
+	.site-header .site-branding{
+		text-align: left;
+	}
+	.site-banner{
+		display:block;
+		width: 100%;
+		height: 172px;
+		margin-top: 8px;
+		margin-bottom: 20px;
+		background-image: url(../img/logo.jpg);
+		background-size: cover
+	}
+	.img-logo img {
+		width: 100%;
+		height: auto;
+	}
+	.main-navigation{
+		display: flex;
+		padding: 10px;
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: 3px;
+		box-shadow: rgb(0 0 0 / 10%) 0px 0px 5px;
+	}
+	.navbar-toggler{
+		display: none;
+	}
+	.sub-menu {
+		display: none;
+		position: absolute;
+	}
+	#site-navigation{
+		display:block;
+		position:relative;
+		margin-left: auto;
+	}
+	#site-navigation .btn-close{
+		display: none;
+	}
+	.main-navigation .search-trigger{
+		position: relative;
+		margin-left: 10px;
+		border:none;
+		right: auto;
+		background-color: transparent;
+	}
+	#site-navigation li{
+		position: relative;
+		display: inline-block;
+		margin:0 5px;
+	}
+	#site-navigation li:hover .sub-menu {
+		display: block;
+		text-align: left;
+		padding: 10px 0;
+		background-color: rgba(255, 255, 255, 0.5);
+		z-index: 1000;
+	}
+	#site-navigation .sub-menu li,#site-navigation .sub-menu li a {
+		display: block;
+	}
+	#site-navigation .sub-menu li a {
+		padding: 5px 15px;
+		word-wrap: unset;
+		word-break: keep-all;
+	}
+	.search-trigger{
+		margin-left: 2px;
+		margin-right: auto;
+	}
+	.site-title {
+		font-size: 32px;
+	}
+	.site-branding .social-icon {
+		margin-bottom: 20px;
+	}
+	.social-icon span{
+		margin-left: 0;
+		margin-right: 5px;
+	}
+	.hentry-archive {
+		padding-left: 35px;
+		padding-right: 35px;
+		padding-bottom: 35px;
+	}
+	.post-navigation .nav-links {
+		position: absolute;
+		width: 100%;
+		display: block;
+	}
+	.post-navigation .nav-links > div {
+		position: relative;
+		top: 50%;
+		width: auto;
+	}
+	.post-navigation .nav-links .nav-previous {
+		float: left;
+		left: -150px;
+	}
+	.post-navigation .nav-links .nav-next {
+		float: right;
+		right: -70px;
+	}
+	.post-navigation .nav-links a {
+		position: fixed;
+		display: block;
+		color: #999;
+		background: rgba(255,255,255,.35);
+		width: 80px;
+		height: 80px;
+		line-height: 80px;
+		bottom: 20%;
+		text-align: center;
+		box-shadow: 0 0 2px rgba(0,0,0,0.2);
+		z-index: 20;
+	}
+	.post-navigation .nav-links a:hover {
+		background: #fff
+	}
+	.post-navigation .nav-links .nav-previous a {
+		border-top-left-radius: 100%;
+		border-bottom-left-radius: 100%;
+	}
+	.post-navigation .nav-links .nav-next a {
+		border-top-right-radius: 100%;
+		border-bottom-right-radius: 100%;
+	}
+	.post-navigation .nav-links a .post-title {
+		display: none;
+	}
+	.form-group,.comment-form-cookies-consent,.form-submit {
+		padding: 0 15px;
+	}
+	.offcanvas-main{
+		padding-left:12%;
+		padding-right: 12%;
+	}
+}
+@media (min-width: 992px) {
+	.site-header .site-branding {
+		text-align: left;
+	}
+	.main-navigation.navbar-default {
+		margin-bottom: 0
+	}
+}
 .fa-spinner:before {
     content: "\f110";
 }
